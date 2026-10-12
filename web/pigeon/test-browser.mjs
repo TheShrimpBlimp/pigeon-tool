@@ -8,13 +8,7 @@ import path from "node:path";
 import { crc } from "./bank.js";
 import { b64 } from "./device.js";
 import { fileURLToPath } from "node:url";
-const { chromium } = await import(
-  process.env.PIGEON_PLAYWRIGHT_MODULE ||
-    new URL(
-      "../../build/gui-deps/testing/node_modules/playwright/index.mjs",
-      import.meta.url,
-    ).href
-);
+const { chromium } = await import(process.env.PIGEON_PLAYWRIGHT_MODULE || "playwright");
 const root = path.resolve(
     process.env.PIGEON_WEB_ROOT ||
       fileURLToPath(new URL("../", import.meta.url)),
@@ -193,7 +187,7 @@ try {
       document.getElementById("status").textContent === "Kit updated locally",
   );
   const project = await fs.readFile(
-    path.join(build, "../expansion-project.funa"),
+    fileURLToPath(new URL("../../tests/fixtures/expansion-project.funa", import.meta.url)),
   );
   const bank = await fs.readFile(path.join(build, "dual-kit.kob"));
   const objects = Array.from({ length: 10 }, (_, id) => {
@@ -239,14 +233,10 @@ try {
     await page.locator("#pattern-grid button").first().textContent(),
     /7/,
   );
-  await page
-    .locator("#firmware-file")
-    .setInputFiles(path.join(build, "../pigeon.fwsc"));
-  await page.waitForFunction(
-    () =>
-      document.getElementById("status").textContent ===
-      "Firmware package validated locally",
-  );
+  if(process.env.PIGEON_TEST_FIRMWARE) {
+    await page.locator("#firmware-file").setInputFiles(process.env.PIGEON_TEST_FIRMWARE);
+    await page.waitForFunction(() => document.getElementById("status").textContent === "Firmware package validated locally");
+  } else console.log("Firmware-package check skipped: set PIGEON_TEST_FIRMWARE to a built .fwsc package");
   const downloaded = page.waitForEvent("download");
   await page.locator("#save").click();
   const download = await downloaded;
@@ -283,7 +273,7 @@ try {
   );
   assert.deepEqual(errors, []);
   console.log(
-    "Pigeon browser: import/encoding, waveform/chop/pad/pattern editing, names, firmware validation, export and reload offline, persistence, and responsive layout passed",
+    "Pigeon browser: import/encoding, waveform/chop/pad/pattern editing, names, optional firmware validation, export and reload offline, persistence, and responsive layout passed",
   );
 } finally {
   await browser.close();

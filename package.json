@@ -1,0 +1,13 @@
+{
+  "name": "pigeon-sample-tool",
+  "version": "0.1.0-dev",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node web/pigeon/test-editing.mjs",
+    "test:browser": "node web/pigeon/test-browser.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.64.0"
+  }
+}

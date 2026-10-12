@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { spawnSync } from "node:child_process";
 import "./test.mjs";
 import { component, crc, inspect } from "./bank.js";
 import {
@@ -16,30 +15,6 @@ import {
   patternLength,
   scanChops,
 } from "./editing.js";
-const root = new URL("../../", import.meta.url).pathname;
-const native = new URL(
-  "../../build/gui-deps/pigeon-editor-native",
-  import.meta.url,
-).pathname;
-const built = spawnSync(
-  process.env.CC || "cc",
-  [
-    "-O1",
-    "-w",
-    "-DFELUCCA_SAMPLER_ONLY=1",
-    "-DFELUCCA_KO_DUAL=1",
-    "-Ibuild/gen",
-    "-Ifirmware/src",
-    "tests/pigeon_expansion_test.c",
-    "-lm",
-    "-o",
-    native,
-  ],
-  { cwd: root, encoding: "utf8" },
-);
-assert.equal(built.status, 0, built.stdout + built.stderr);
-const fixtureRun = spawnSync(native, [], { cwd: root, encoding: "utf8" });
-assert.equal(fixtureRun.status, 0, fixtureRun.stdout + fixtureRun.stderr);
 let bank = new Uint8Array(
     fs.readFileSync(
       new URL("../../build/gui-deps/dual-kit.kob", import.meta.url),
@@ -64,7 +39,7 @@ assert.deepEqual(padSettings(bank), settings);
 assert.equal(inspect(renameSong(bank, 2, "SECOND")).songs[1].name, "SECOND");
 assert.deepEqual(component(renameSong(bank, 2, "SECOND"), 2).song, before);
 assert.equal(scanChops(new Float32Array(1000), 50).length, 1);
-const fixture = new URL("../../build/expansion-project.funa", import.meta.url);
+const fixture = new URL("../../tests/fixtures/expansion-project.funa", import.meta.url);
 let bytes = new Uint8Array(fs.readFileSync(fixture));
 const p = project(bytes);
 assert.equal(p.np, 111);
@@ -106,15 +81,10 @@ assert.throws(() => editStep(bytes, 0, 10, { nudge: 8 }));
 assert.throws(() => editStep(bytes, 0, 10, { condition: 5 }));
 const out = new URL("../../build/expansion-edited.funa", import.meta.url);
 fs.writeFileSync(out, bytes);
-const result = spawnSync(native, [out.pathname, "performance"], {
-  env: { ...process.env, ASAN_OPTIONS: "detect_leaks=0" },
-  encoding: "utf8",
-});
-assert.equal(result.status, 0, result.stdout + result.stderr);
 fs.writeFileSync(
   new URL("../../build/gui-deps/edited-bank.kob", import.meta.url),
   bank,
 );
 console.log(
-  "GUI editing: chop/kit metadata, audio preservation, all probability values, repeats/length, and actual firmware FUNA import passed",
+  "GUI editing: chop/kit metadata, audio preservation, all probability values, repeats/length, and FUNA editing passed (native firmware compatibility is tested in the firmware repository)",
 );
