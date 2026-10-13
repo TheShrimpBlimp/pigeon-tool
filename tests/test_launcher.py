@@ -15,9 +15,9 @@ class LauncherTest(unittest.TestCase):
                                 cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         try:
             line = proc.stdout.readline().strip()
-            self.assertTrue(line.startswith('Pigeon GUI: http://127.0.0.1:'), line)
-            url = line.removeprefix('Pigeon GUI: ')
-            for suffix, expected in (('', b'Pigeon'), ('app.js', b'import'), ('../', b'Open sample tool')):
+            self.assertTrue(line.startswith('PIGEON GUI: http://127.0.0.1:'), line)
+            url = line.removeprefix('PIGEON GUI: ')
+            for suffix, expected in (('', b'PIGEON'), ('app.js', b'import'), ('../', b'Open sample tool')):
                 with urlopen(url + suffix, timeout=5) as response:
                     self.assertEqual(response.status, 200)
                     self.assertIn(expected, response.read())

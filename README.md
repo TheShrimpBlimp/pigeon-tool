@@ -1,6 +1,6 @@
-# Pigeon Sample Tool
+# PIGEON Sample Tool
 
-Local browser sample editor and USB MIDI bank manager for Pigeon FM1 firmware.
+Local browser sample editor and USB MIDI bank manager for PIGEON FM1 firmware.
 Created and directed by The Shrimp Blimp.
 
 Run `python3 tools/pigeon_gui.py`, or double-click `Open Pigeon.command` on macOS.
