@@ -1,18 +1,13 @@
 # Pigeon licensing
 
-The owner-supplied splash photograph in `assets/branding/splash.png` is not an
-inherited Felucca asset. Its provenance and redistribution status are documented
-in `assets/branding/README.md`; the software license does not establish a license
-for that photograph.
+The sampler uses a Pigeon text splash; no photograph is distributed.
 
 Pigeon is a derivative of Felucca 1.5.1, developed as an independent FM1
 performance sampler. Original copyright and license notices remain intact.
 
 Pigeon is free software, licensed under the GNU General Public License, version 3 only
 (`GPL-3.0-only`, full text in `LICENSE`). That covers Pigeon source contributions and inherited GPL code. Creative assets
-retain their documented licenses; the supplied photograph is addressed separately
-above. A few
-bundled or ported parts keep their own licences; they are listed below, and their licence
+retain their documented licenses. A few bundled or ported parts keep their own licences; they are listed below, and their licence
 texts are in `LICENSES/`.
 
 The Pigeon sampler profile bundles libmad under
@@ -147,3 +142,13 @@ modified only to set the output sample rate explicitly. Original corresponding
 source, attribution, and LGPL/GPL texts are shipped in that directory and with
 the generated website. See [encoder provenance](web/pigeon/vendor/README.md).
 This browser dependency is separate from the firmware image.
+
+## ChoralRoot installer safeguards
+
+Source-firmware compatibility checks in `web/fm1ota.js` are adapted from
+[ChoralRoot FM-1](https://github.com/Quixotic7/ChoralRootFM1) by Quixotic7
+and the ChoralRoot FM-1 contributors (GPL-3.0-only), revision
+`aa5875af20e3046ee161f988c5d91d3ae66d0c74`. Their notices are retained.
+[Pigeon firmware recovery and first-install limits](https://theshrimpblimp.com/pigeon/guide/PIGEON_RECOVERY.md)
+apply to packages with the Pigeon recovery stub; the tool alone cannot add it
+to previously installed firmware.
