@@ -51,7 +51,7 @@
             type="file"
             accept=".kob,.pigeon" /></label
         ><button id="read" data-device>Read device bank</button
-        ><button id="save" data-bank>Save bank</button
+        ><button id="save" data-bank>Save bank</button><button id="open-emulator" data-bank>Try this bank in emulator ↗</button
         ><button id="upload" data-device data-bank>Send bank to FM1</button
         ><button id="backup" data-device>Back up full session</button
         ><button id="restore" data-device>Restore session to FM1</button
@@ -77,12 +77,12 @@
         </div>
         <progress
           id="capacity"
-          max="417792"
+          max="507904"
           value="0"
           aria-label="Sample storage usage"
         ></progress>
         <p>
-          408 KiB shared between both songs and the kit. Replacing one component
+          Up to 496 KiB shared between both songs and the kit with the expanded firmware layout; older builds have 408 KiB. Connected capacity is checked before transfer. Replacing one component
           preserves the others.
         </p>
       </section>
@@ -163,6 +163,6 @@
 <p>Installer compatibility safeguards, recovery boot stub, and commit-last update design adapted from <a href="https://github.com/Quixotic7/ChoralRootFM1" target="_blank" rel="noopener noreferrer">ChoralRoot FM-1</a> by Quixotic7 and the ChoralRoot FM-1 contributors (GPL-3.0-only). PIGEON adapts the recovery layout to preserve its sample storage.</p>
 <p>Font: <a href="https://github.com/disastrid/LittleCharacter" target="_blank" rel="noopener noreferrer">Little Character</a> (SIL OFL 1.1). MP3 decoding: libmad (GPL-2.0-or-later); browser MP3 encoding: lamejs/LAME (LGPL-3.0). Firmware packages include three JieLi AC79 SDK files (Apache-2.0).</p>
 <p>M-VAVE and FM-1 are trademarks of their respective owners. PIGEON is an independent project.</p></details></footer>
-    <script type="module" src="app.js?v=25"></script>
+    <script type="module" src="app.js?v=28"></script>
   </body>
 </html>

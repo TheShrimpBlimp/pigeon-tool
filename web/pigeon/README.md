@@ -150,11 +150,18 @@ Select a chop and choose the other key under Copy from. **Swap selected with Cop
 
 In Drum pad settings, select the source pad and a Copy to pad destination, then **Copy pad to key**. Audio and playback settings are copied together; unused intermediate keys become silent pads. Send the edited bank to use it on your physical FM1.
 
-**Undo** and **Redo** retain 20 committed workspace snapshots while this page is open, covering bank, chop, pad, label and pattern/session edits. Ctrl+Z / Cmd+Z undo; Ctrl+Shift+Z / Cmd+Shift+Z and Ctrl+Y redo. Text inputs keep their normal text undo. Staged audio, uncommitted fields, device transfers and library deletions are outside workspace history. Reloading clears undo history but retains the current workspace.
+**Undo** and **Redo** retain 20 committed workspace snapshots while this page is open, covering bank, chop, pad, label and pattern/session edits. Ctrl+Z / Cmd+Z undo; Ctrl+Shift+Z / Cmd+Shift+Z and Ctrl+Y redo. Text inputs keep their normal text undo. Draft audio has its own undo history while editing; uncommitted fields, device transfers and library deletions are outside workspace history. Reloading clears undo history but retains the current workspace.
 
 The **Session library** stores named banks and full sessions in this browser. Save, load, rename, delete or download entries. Loading is a local edit and can be undone. Download copies to preserve them outside browser storage. A bank contains samples and settings; a full session also carries patterns and supported device settings.
 
 
 ## Sample loader 2.0 waveform controls
 
-Click the waveform to place its cursor; the white cursor head can be dragged. Drag the green S/E flags to trim, drag inside the selection to move the complete region, or Shift-drag a new region. Scroll over the waveform to zoom around the pointer, or use the optional Zoom slider. Drag the overview below the waveform to pan; Alt-drag or Shift-wheel also pans. Double-click resets the view. Arrow keys move the cursor; Home/End jump to the file edges. The cursor follows section and chop previews. Precise numeric start/end fields remain available.
+Click the waveform to place its cursor; the white cursor head can be dragged. Drag the green S/E flags to trim, drag the song waveform to select a region (Shift-drag also selects); in the chop editor, drag inside its selection to move the complete region. Scroll over the waveform to zoom around the pointer, or use the optional Zoom slider. Drag the overview below the waveform to pan; Alt-drag or Shift-wheel also pans. Double-click resets the view. Arrow keys move the cursor; Home/End jump to the file edges. The cursor follows section and chop previews. Precise numeric start/end fields remain available.
+
+
+## Timeline editing
+
+The waveform uses the firmware’s 220-column envelope. Drag to select audio; Backspace/Delete removes it, Keep selection discards everything else, and S splits at the cursor. Drag clip chips to rearrange them or use their move buttons. Copy, cut and paste work at the cursor. Ctrl/Cmd+Z and redo also cover draft audio edits. Adding another file appends it to the current song. Apply commits the edited audio to the bank.
+
+Use **Try this bank in emulator** to open the current bank or full session directly in the hosted emulator. Switch the emulator on to load it. **Load bank / session** also accepts saved `.kob` banks and `.pigeon` sessions; sessions retain their patterns. Banks must fit the connected device’s reported capacity before transfer.
