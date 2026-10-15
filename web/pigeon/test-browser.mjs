@@ -132,6 +132,7 @@ try {
   await page.keyboard.press('ControlOrMeta+z');
   await page.waitForFunction(()=>Number(document.getElementById('end0').value)>.99);
   assert.equal(await canvas.getAttribute('data-wave-columns'),'220');
+  await page.locator('#start0').evaluate(el=>{for(let p=el.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;});
   await page.locator('#start0').fill('0');await page.locator('#end0').fill('1');
   await page.locator("#apply0").click();
   await page.waitForFunction(
@@ -156,6 +157,7 @@ try {
       .getElementById("status")
       .textContent.startsWith("Files appended"),
   );
+  await page.locator('#rate1').evaluate(el=>{for(let p=el.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;});
   await page.locator("#rate1").selectOption("24");
   await page.locator("#apply1").click();
   await page.waitForFunction(
@@ -178,25 +180,27 @@ try {
   // Undo is a complete committed workspace snapshot, including keyboard shortcuts.
   const bankBytes=()=>page.evaluate(async()=>{const d=await new Promise(r=>{const q=indexedDB.open('pigeon-library',1);q.onsuccess=()=>r(q.result);});const b=await new Promise(r=>{const q=d.transaction('files').objectStore('files').get('bank');q.onsuccess=()=>r(q.result);});d.close();return Array.from(b);});
   const originalBank=await bankBytes();
+  await page.locator('#rename-song').evaluate(el=>{for(let p=el.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;});
   await page.locator('#rename-song').fill('UNDO');await page.locator('#rename-apply').click();
-  await page.getByText('Song renamed locally',{exact:true}).first().waitFor();
+  await page.locator('#status').filter({hasText:'Song renamed locally'}).waitFor();
   const renamedBank=await bankBytes();assert.notDeepEqual(renamedBank,originalBank);
   await page.locator('h1').click();await page.keyboard.press('Control+z');
-  await page.getByText('Local edit undone',{exact:true}).first().waitFor();assert.deepEqual(await bankBytes(),originalBank);
-  await page.keyboard.press('Control+Shift+z');await page.getByText('Local edit redone',{exact:true}).first().waitFor();assert.deepEqual(await bankBytes(),renamedBank);
-  await page.keyboard.press('Meta+z');await page.getByText('Local edit undone',{exact:true}).first().waitFor();assert.deepEqual(await bankBytes(),originalBank);
-  await page.keyboard.press('Control+y');await page.getByText('Local edit redone',{exact:true}).first().waitFor();assert.deepEqual(await bankBytes(),renamedBank);
-  await page.locator('#undo').click();await page.getByText('Local edit undone',{exact:true}).first().waitFor();
+  await page.locator('#status').filter({hasText:'Local edit undone'}).waitFor();assert.deepEqual(await bankBytes(),originalBank);
+  await page.keyboard.press('Control+Shift+z');await page.locator('#status').filter({hasText:'Local edit redone'}).waitFor();assert.deepEqual(await bankBytes(),renamedBank);
+  await page.keyboard.press('Meta+z');await page.locator('#status').filter({hasText:'Local edit undone'}).waitFor();assert.deepEqual(await bankBytes(),originalBank);
+  await page.keyboard.press('Control+y');await page.locator('#status').filter({hasText:'Local edit redone'}).waitFor();assert.deepEqual(await bankBytes(),renamedBank);
+  await page.locator('#undo').click();await page.locator('#status').filter({hasText:'Local edit undone'}).waitFor();
+  await page.locator('#library-name').evaluate(el=>{for(let p=el.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;});
   await page.locator('#library-name').fill('Offline test');await page.locator('#library-save').click();
-  await page.getByText('Saved in this browser’s library',{exact:true}).first().waitFor();
+  await page.locator('#status').filter({hasText:'Saved in this browser’s library'}).waitFor();
   assert.equal(await page.locator('#library-list option').count(),1);
-  await page.locator('#rename-song').fill('ALTERED');await page.locator('#rename-apply').click();await page.getByText('Song renamed locally',{exact:true}).first().waitFor();
-  await page.locator('#library-load').click();await page.getByText('Library entry loaded locally',{exact:true}).first().waitFor();assert.deepEqual(await bankBytes(),originalBank);
+  await page.locator('#rename-song').fill('ALTERED');await page.locator('#rename-apply').click();await page.locator('#status').filter({hasText:'Song renamed locally'}).waitFor();
+  await page.locator('#library-load').click();await page.locator('#status').filter({hasText:'Library entry loaded locally'}).waitFor();assert.deepEqual(await bankBytes(),originalBank);
   await page.locator('#pad-copy-target').selectOption('15');await page.locator('#pad-copy').click();
-  await page.getByText('Kit updated locally',{exact:true}).first().waitFor();
+  await page.locator('#status').filter({hasText:'Kit updated locally'}).waitFor();
   const padCopy=await page.evaluate(async()=>{const d=await new Promise(r=>{const q=indexedDB.open('pigeon-library',1);q.onsuccess=()=>r(q.result);});const b=await new Promise(r=>{const q=d.transaction('files').objectStore('files').get('bank');q.onsuccess=()=>r(q.result);});d.close();const {encodedPad,inspect}=await import('/pigeon/bank.js');return {count:inspect(b).pads,a:encodedPad(b,0),b:encodedPad(b,15)};});
   assert.equal(padCopy.count,16);assert.deepEqual(padCopy.a,padCopy.b);
-  await page.locator('#undo').click();await page.getByText('Local edit undone',{exact:true}).first().waitFor();assert.deepEqual(await bankBytes(),originalBank);
+  await page.locator('#undo').click();await page.locator('#status').filter({hasText:'Local edit undone'}).waitFor();assert.deepEqual(await bankBytes(),originalBank);
   await page.locator("#pad0").click();
   await page.waitForFunction(
     () => document.getElementById("status").textContent === "Playing pad 1",
@@ -211,6 +215,7 @@ try {
   await page.waitForFunction(() =>
     document.getElementById("status").textContent.startsWith("Loaded Song"),
   );
+  await page.locator('#chop-attack').evaluate(el=>{for(let p=el.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;});
   await page.locator("#chop-attack").fill("50");
   await page.locator("#chop-choke").fill("1");
   await page.locator("#chop-release").fill("200");
@@ -225,19 +230,20 @@ try {
       document.getElementById("status").textContent === "Chops updated locally",
   );
   await page.locator('#chop-index').selectOption('1');await page.locator('#chop-pitch').fill('7');await page.locator('#chop-start').fill(String(Number(await page.locator('#chop-start').inputValue())+.005));await page.locator('#chop-attack').fill('0');await page.locator('#chop-apply').click();
-  await page.getByText('Chop updated locally',{exact:true}).first().waitFor();
+  await page.locator('#status').filter({hasText:'Chop updated locally'}).waitFor();
   const chopCountBeforeCopy=await page.locator('#chop-index option').count();
   const beforeReassign=await bankBytes();
   for(const action of ['swap','move']) {
-    await page.locator('#chop-index').selectOption('1');await page.locator('#chop-copy').selectOption('0');await page.locator(`#chop-${action}`).click();
-    await page.getByText('Chops updated locally',{exact:true}).first().waitFor();
+    await page.locator('#chop-index').selectOption('1');await page.locator('#chop-copy').evaluate(el=>{for(let p=el.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true;});
+  await page.locator('#chop-copy').selectOption('0');await page.locator(`#chop-${action}`).click();
+    await page.locator('#status').filter({hasText:'Chops updated locally'}).waitFor();
     assert.equal(await page.locator('#chop-index').inputValue(),'0');assert.equal(await page.locator('#chop-pitch').inputValue(),'7');
     assert.equal(await page.locator('#chop-index option').count(),chopCountBeforeCopy);
-    await page.locator('#undo').click();await page.getByText('Local edit undone',{exact:true}).first().waitFor();assert.deepEqual(await bankBytes(),beforeReassign);
+    await page.locator('#undo').click();await page.locator('#status').filter({hasText:'Local edit undone'}).waitFor();assert.deepEqual(await bankBytes(),beforeReassign);
   }
   await page.locator('#chop-index').selectOption('1');
   await page.locator('#chop-copy').selectOption('0');await page.locator('#chop-full').click();
-  await page.getByText('Chops updated locally',{exact:true}).first().waitFor();
+  await page.locator('#status').filter({hasText:'Chops updated locally'}).waitFor();
   const copied=await page.evaluate(async()=>{const d=await new Promise(r=>{const q=indexedDB.open('pigeon-library',1);q.onsuccess=()=>r(q.result);}),image=await new Promise(r=>{const q=d.transaction('files').objectStore('files').get('bank');q.onsuccess=()=>r(q.result);});d.close();const {songChops}=await import('/pigeon/editing.js');return songChops(image,1);});
   assert.equal(copied.length,chopCountBeforeCopy);assert.deepEqual(copied[1],copied[0]);assert.equal(await page.locator('#chop-index').inputValue(),'1');assert.equal(await page.locator('#chop-pitch').inputValue(),'0');
   await page.locator("#pad-pitch").fill("5");
@@ -308,11 +314,11 @@ try {
     /7/,
   );
   await page.locator('#pattern-chop').fill('9');await page.locator('#pattern-apply').click();
-  await page.getByText('Pattern step updated locally',{exact:true}).first().waitFor();
-  await page.locator('#undo').click();await page.getByText('Local edit undone',{exact:true}).first().waitFor();
+  await page.locator('#status').filter({hasText:'Pattern step updated locally'}).waitFor();
+  await page.locator('#undo').click();await page.locator('#status').filter({hasText:'Local edit undone'}).waitFor();
   assert.match(await page.locator('#pattern-grid button').first().textContent(),/7/);
   await page.locator('#library-name').fill('Full session');await page.locator('#library-save').click();
-  await page.getByText('Saved in this browser’s library',{exact:true}).first().waitFor();
+  await page.locator('#status').filter({hasText:'Saved in this browser’s library'}).waitFor();
   await page.locator('#library-list').selectOption({label:'Full session (session)'});
   const libraryDownload=page.waitForEvent('download');await page.locator('#library-download').click();
   const libraryFile=await libraryDownload;assert.equal(libraryFile.suggestedFilename(),'Full session.pigeon');
