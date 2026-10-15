@@ -1,3 +1,4 @@
+import { arrangeWorkspace } from "./layout.js";
 import {cloneClips,deleteRange,sliceTimeline,splitTimeline,pasteTimeline,moveClip,timelineLength} from "./timeline.js";
 import {assemble,trimmedSegments} from './audio-assembly.js';
 import {saveChops} from './editing.js';
@@ -16,7 +17,7 @@ import {
   HEAD,
   join,
 } from "./bank.js";
-import { editors as createEditors } from "./editors.js?v=28";
+import { editors as createEditors } from "./editors.js?v=29";
 import { WaveEditor } from "./wave-editor-v2.js";
 import { Package, logicalImage } from "../fm1pkg.js";
 import { Updater } from "../fm1ota.js";
@@ -939,6 +940,7 @@ if(emulatorLink){
   status(session?'Emulator session ready: current sequence, saved A–D patterns, settings, and samples. Connect your FM1, then use Restore session to FM1. This replaces its projects, settings, and sample bank.':'Emulator bank ready, including chop settings. Connect your FM1, then press Send bank to FM1. This replaces its sample bank.');
  }catch(e){status(`Emulator bank could not be opened: ${e.message}`,true);}
 }
+arrangeWorkspace();
 const offlineReady = await caching;
 initializing = false;
 controls();
