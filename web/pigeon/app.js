@@ -15,8 +15,8 @@ import {
   HEAD,
   join,
 } from "./bank.js";
-import { editors as createEditors } from "./editors.js?v=23";
-import { WaveEditor } from "./wave-editor.js";
+import { editors as createEditors } from "./editors.js?v=25";
+import { WaveEditor } from "./wave-editor-v2.js";
 import { Package, logicalImage } from "../fm1pkg.js";
 import { Updater } from "../fm1ota.js";
 import { crc } from "./bank.js";
@@ -83,11 +83,44 @@ function controls() {
       (e.hasAttribute("data-device") && !device);
   });
   $("send-help").textContent=initializing?"Preparing the tool…":busy?"Operation in progress — keep USB connected.":!image?"Open a .kob bank or import Song 1 before sending.":!device?"Bank ready. Connect the FM1 and select matching MIDI ports before sending.":"Bank and FM1 ready. Press Send bank to review the transfer.";
+  $("undo").disabled = initializing || busy || !undoStack.length;
+  $("redo").disabled = initializing || busy || !redoStack.length;
   $("restore").disabled = initializing || busy || !device || !archive;
   $("recovery").disabled = initializing || busy || !recovery;
 }
+const undoStack = [], redoStack = [];
+const snapshot = () => structuredClone({image, archive, labels});
+const sameWorkspace = (a,b) => JSON.stringify(a) === JSON.stringify(b);
+async function restoreWorkspace(value) {
+  if(value.image) inspect(value.image);
+  if(value.archive) validateArchive(value.archive);
+  const d=await db;
+  await new Promise((resolve,reject)=>{
+    const t=d.transaction("files","readwrite"), files=t.objectStore("files");
+    files.put(value.image,"bank"); files.put(value.archive,"session"); files.put(value.labels,"labels");
+    t.oncomplete=resolve; t.onerror=()=>reject(t.error); t.onabort=()=>reject(t.error||Error("Local save cancelled"));
+  });
+  ({image,archive,labels}=structuredClone(value)); render();
+}
+async function historyStep(redo=false) {
+  if(busy||initializing)return;
+  const from=redo?redoStack:undoStack, to=redo?undoStack:redoStack;
+  if(!from.length)return;
+  busy=true;controls();
+  try { const current=snapshot(); await restoreWorkspace(from.at(-1)); from.pop();to.push(current);status(redo?"Local edit redone":"Local edit undone"); }
+  catch(e){status(e.message,true);}finally{busy=false;controls();}
+}
+$("undo").onclick=()=>historyStep();
+$("redo").onclick=()=>historyStep(true);
+document.addEventListener("keydown",e=>{
+  if(!(e.ctrlKey||e.metaKey)||e.altKey||e.target.closest("input,textarea,[contenteditable=true]"))return;
+  const key=e.key.toLowerCase();
+  if(key!=="z"&&!(key==="y"&&e.ctrlKey))return;
+  e.preventDefault();historyStep(key==="y"||e.shiftKey);
+});
 async function run(fn) {
   if (busy || initializing) return;
+  const before = snapshot();
   busy = true;
   controls();
   $("job").value = 0;
@@ -97,6 +130,9 @@ async function run(fn) {
   } catch (e) {
     status(e.message || String(e), true);
   } finally {
+    if(!sameWorkspace(before,snapshot())) {
+      undoStack.push(before); if(undoStack.length>20)undoStack.shift(); redoStack.length=0;
+    }
     busy = false;
     controls();
   }
@@ -180,7 +216,7 @@ function wave(canvas, pcm, starts = []) {
     c.stroke();
   }
 }
-async function play(pcm, rate = 22050, loop = false) {
+async function play(pcm, rate = 22050, loop = false, wave = null, offset = 0) {
   const c = await context();
   playing?.stop();
   const b = c.createBuffer(1, pcm.length, rate);
@@ -190,6 +226,7 @@ async function play(pcm, rate = 22050, loop = false) {
   playing.connect(c.destination);
   playing.loop = loop;
   playing.start();
+  if(wave){const source=playing,start=c.currentTime;const tick=()=>{if(playing!==source||!wave.pcm)return;const elapsed=(c.currentTime-start)*rate;if(!source.loop&&elapsed>=pcm.length)return;wave.setCursor(offset+(source.loop?elapsed%pcm.length:elapsed));frame=requestAnimationFrame(tick);};let frame=requestAnimationFrame(tick);source.onended=()=>cancelAnimationFrame(frame);}
 }
 async function songAudio(slot) {
   const s = component(image, slot);
@@ -303,19 +340,16 @@ function render() {
 for (let i = 0; i < 2; i++) {
   const section = document.createElement("article");
   section.className = "song";
-  section.innerHTML = `<div class="song-header"><p class="eyebrow">SONG ${i + 1}</p><strong class="song-name" id="name${i}">Empty</strong></div><p class="song-info" id="info${i}"></p><canvas class="wave" id="wave${i}" aria-label="Song ${i + 1} waveform"></canvas><label>Choose audio files<input id="file${i}" type="file" accept="audio/*" multiple></label><div class="trim"><label>Start (seconds)<input id="start${i}" type="number" min="0" step="0.01" value="0"></label><label>End (seconds)<input id="end${i}" type="number" min="0" step="0.01" value="0"></label><label>Quality<select id="rate${i}">${[24, 32, 40, 48, 56, 64].map((n) => `<option value="${n}" ${n === 64 ? "selected" : ""}>${n} kbps</option>`).join("")}</select></label></div><p id="source-name${i}"></p><details class="clip-builder"><summary>Cut and merge clips</summary><p>Files join in the order below. Trim each clip, reorder or remove it, then rebuild. Each clip becomes a chop, up to 32. Gain and short fades apply when you rebuild; fades default to 3 ms.</p><div id="clips${i}"></div><label>Add files<input id="append${i}" type="file" accept="audio/*" multiple></label><button id="merge${i}">Rebuild song from clips</button></details><div class="edit-fields"><label>Zoom<input id="trim-zoom${i}" type="range" min="0" max="8" value="0"></label><label>Scroll<input id="trim-scroll${i}" type="range" min="0" max="1000" value="0"></label><label>Loop preview<select id="trim-loop${i}"><option value="0">Off</option><option value="1">On</option></select></label><button id="trim-stop${i}">Stop preview</button></div><p id="estimate${i}">Choose a file to trim and estimate its size.</p><div class="song-actions"><button id="preview${i}" class="secondary">Preview section</button><button id="stored${i}" class="secondary" data-bank>Preview stored song</button><button id="apply${i}">Apply to local Song ${i + 1}</button></div>`;
+  section.innerHTML = `<div class="song-header"><p class="eyebrow">SONG ${i + 1}</p><strong class="song-name" id="name${i}">Empty</strong></div><p class="song-info" id="info${i}"></p><canvas class="wave" id="wave${i}" aria-label="Song ${i + 1} waveform"></canvas><p class="wave-help">Drag S/E flags to trim; drag the selection to move it. Click to place the cursor, Shift-drag to select a new region. Scroll to zoom, drag the overview to pan; double-click resets the view.</p><label>Choose audio files<input id="file${i}" type="file" accept="audio/*" multiple></label><div class="trim"><label>Start (seconds)<input id="start${i}" type="number" min="0" step="0.01" value="0"></label><label>End (seconds)<input id="end${i}" type="number" min="0" step="0.01" value="0"></label><label>Quality<select id="rate${i}">${[24, 32, 40, 48, 56, 64].map((n) => `<option value="${n}" ${n === 64 ? "selected" : ""}>${n} kbps</option>`).join("")}</select></label></div><p id="source-name${i}"></p><details class="clip-builder"><summary>Cut and merge clips</summary><p>Files join in the order below. Trim each clip, reorder or remove it, then rebuild. Each clip becomes a chop, up to 32. Gain and short fades apply when you rebuild; fades default to 3 ms.</p><div id="clips${i}"></div><label>Add files<input id="append${i}" type="file" accept="audio/*" multiple></label><button id="merge${i}">Rebuild song from clips</button></details><div class="edit-fields"><label>Zoom<input id="trim-zoom${i}" type="range" min="0" max="8" step="0.01" value="0"></label><output id="trim-cursor${i}">Cursor 0.000 s</output><label>Loop preview<select id="trim-loop${i}"><option value="0">Off</option><option value="1">On</option></select></label><button id="trim-stop${i}">Stop preview</button></div><p id="estimate${i}">Choose a file to trim and estimate its size.</p><div class="song-actions"><button id="preview${i}" class="secondary">Preview section</button><button id="stored${i}" class="secondary" data-bank>Preview stored song</button><button id="apply${i}">Apply to local Song ${i + 1}</button></div>`;
   $("songs").append(section);
   trimWaves[i] = new WaveEditor($(`wave${i}`), (a, b) => {
     $(`start${i}`).value = (a / 22050).toFixed(5);
     $(`end${i}`).value = (b / 22050).toFixed(5);
     estimate();
   });
-  for (const k of ["zoom", "scroll"])
-    $(`trim-${k}${i}`).oninput = () => {
-      trimWaves[i].zoom = Number($(`trim-zoom${i}`).value);
-      trimWaves[i].scroll = Number($(`trim-scroll${i}`).value) / 1000;
-      trimWaves[i].draw();
-    };
+  trimWaves[i].onCursorChange=p=>$(`trim-cursor${i}`).textContent=`Cursor ${(p/22050).toFixed(3)} s`;
+  trimWaves[i].onViewChange=zoom=>$(`trim-zoom${i}`).value=zoom;
+  $(`trim-zoom${i}`).oninput=()=>trimWaves[i].setZoom(Number($(`trim-zoom${i}`).value));
   $(`trim-stop${i}`).onclick = () => {
     playing?.stop();
     status("Preview stopped");
@@ -327,7 +361,10 @@ for (let i = 0; i < 2; i++) {
       `Section: ${Math.max(0, seconds).toFixed(2)} s • about ${((Math.max(0, seconds) * (br * 125 + (22050 / 576) * 4)) / 1024 + 8.5).toFixed(1)} KiB. Final size is checked before changing the bank.`;
   };
   for (const k of ["start", "end", "rate"])
-    $(`${k}${i}`).addEventListener("input", estimate);
+    $(`${k}${i}`).addEventListener("input",()=>{
+      estimate();const pcm=sources[i]?.pcm,a=Math.round(Number($(`start${i}`).value)*22050),b=Math.round(Number($(`end${i}`).value)*22050);
+      if(pcm&&a>=0&&b>a&&b<=pcm.length)trimWaves[i].set(pcm,a,b);
+    });
   function drawClips(){
     const container=$(`clips${i}`);container.replaceChildren();
     clipLists[i].forEach((clip,index)=>{
@@ -371,7 +408,7 @@ for (let i = 0; i < 2; i++) {
   }
   $(`preview${i}`).onclick = () =>
     run(async () => {
-      await play(sectionPcm(), 22050, Number($(`trim-loop${i}`).value) === 1);
+      await play(sectionPcm(), 22050, Number($(`trim-loop${i}`).value) === 1,trimWaves[i],Math.round(Number($(`start${i}`).value)*22050));
       status(`Playing Song ${i + 1} import section`);
     });
   $(`stored${i}`).onclick = () =>
@@ -693,6 +730,36 @@ async function offline() {
     return false;
   }
 }
+// Named local snapshots; loading one never writes to a connected instrument.
+async function libraryEntries() { return (await load("saved-library")) || []; }
+async function refreshLibrary() {
+  const entries=await libraryEntries();
+  $("library-list").replaceChildren(...entries.map(e=>new Option(`${e.name} (${e.value.archive?"session":"bank"})`,e.id)));
+}
+$("library-save").onclick=()=>run(async()=>{
+  if(!image)throw Error("Open a bank or session first");
+  const name=$("library-name").value.trim();if(!name)throw Error("Enter a library name");
+  const entries=await libraryEntries();entries.push({id:crypto.randomUUID(),name,value:snapshot()});
+  await store("saved-library",entries);await refreshLibrary();status("Saved in this browser’s library");
+});
+$("library-load").onclick=()=>run(async()=>{
+  const entry=(await libraryEntries()).find(e=>e.id===$("library-list").value);
+  if(!entry)throw Error("Choose a library entry");await restoreWorkspace(entry.value);status("Library entry loaded locally");
+});
+$("library-rename").onclick=()=>run(async()=>{
+  const entries=await libraryEntries(),entry=entries.find(e=>e.id===$("library-list").value),name=$("library-name").value.trim();
+  if(!entry||!name)throw Error("Choose an entry and enter its new name");entry.name=name;await store("saved-library",entries);await refreshLibrary();
+});
+$("library-download").onclick=()=>run(async()=>{
+  const entry=(await libraryEntries()).find(e=>e.id===$("library-list").value);if(!entry)throw Error("Choose an entry");
+  if(entry.value.archive)saveArchive(`${entry.name}.pigeon`,entry.value.archive);else download(`${entry.name}.kob`,entry.value.image);
+});
+$("library-delete").onclick=()=>run(async()=>{
+  const entries=await libraryEntries(),entry=entries.find(e=>e.id===$("library-list").value);
+  if(!entry)throw Error("Choose an entry");if(!confirm(`Delete “${entry.name}” from this browser’s library?`))return;
+  await store("saved-library",entries.filter(e=>e.id!==entry.id));await refreshLibrary();
+});
+refreshLibrary().catch(e=>status(e.message,true));
 editors = createEditors({
   bank: () => image,
   archive: () => archive,
