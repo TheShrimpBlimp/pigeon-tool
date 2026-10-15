@@ -10,7 +10,10 @@ import { b64,validateArchive } from "./device.js";
 import { fileURLToPath } from "node:url";
 const { chromium } = await import(
   process.env.PIGEON_PLAYWRIGHT_MODULE ||
-    "playwright"
+    new URL(
+      "../../build/gui-deps/testing/node_modules/playwright/index.mjs",
+      import.meta.url,
+    ).href
 );
 const root = path.resolve(
     process.env.PIGEON_WEB_ROOT ||
@@ -95,7 +98,7 @@ try {
   await page.locator('#file0').setInputFiles([wav,{...wav,name:'second.wav'}]);
   await page.waitForFunction(()=>document.querySelectorAll('#clips0 .clip-row').length===2);
   await page.locator('#merge0:not([disabled])').waitFor({state:'attached'});
-  await page.locator('#songs .clip-builder summary').first().click();
+  await page.locator('#songs .clip-builder').first().evaluate(el=>el.open=true);
   await page.getByLabel('Clip 1 end',{exact:true}).fill('0.1');
   await page.getByLabel('Clip 1 gainDb',{exact:true}).fill('-6');await page.getByLabel('Clip 2 gainDb',{exact:true}).fill('-6');
   await page.locator('#clips0 .clip-row').last().getByText('Move up',{exact:true}).click();
@@ -107,13 +110,14 @@ try {
   assert(gainPeak<.35 && gainPeak>.05,'encoding must preserve clip attenuation instead of normalizing it away');
   assert.equal(joined.length,2);assert.equal(joined[0].a,0);assert.equal(joined[0].b,joined[1].a);assert(joined[1].b>joined[1].a);
   await page.locator('#clips0 .clip-row').first().getByText('Remove',{exact:true}).click();assert.equal(await page.locator('#clips0 .clip-row').count(),1);
+  await page.locator("#draft-clear0").click();
   await page.locator("#file0").setInputFiles(wav);
   await page.waitForFunction(() =>
-    document.getElementById("status").textContent.startsWith("Selected hit"),
+    document.getElementById("status").textContent.startsWith("Files appended"),
   );
   const canvas=page.locator('#wave0');await canvas.scrollIntoViewIfNeeded();const box=await canvas.boundingBox();
   await canvas.click({position:{x:box.width*.4,y:box.height*.4}});
-  assert(Number(await canvas.getAttribute('data-cursor'))>0);assert.equal(Number(await page.locator('#start0').inputValue()),0,'placing a cursor must not change trim');
+  assert(Number(await canvas.getAttribute('data-cursor'))>0);assert(Number(await page.locator('#start0').inputValue())>.3,'click places an empty selection at the cursor');
   await canvas.hover({position:{x:box.width*.4,y:box.height*.4}});await page.mouse.wheel(0,-180);
   await page.waitForFunction(()=>Number(document.querySelector('#wave0').dataset.zoom)>0);
   await canvas.click({position:{x:box.width*.85,y:box.height*.94}});
@@ -122,8 +126,12 @@ try {
   assert.equal(Number(await canvas.getAttribute('data-zoom')),0);
   await page.keyboard.down('Shift');await page.mouse.move(box.x+box.width*.2,box.y+box.height*.4);await page.mouse.down();await page.mouse.move(box.x+box.width*.6,box.y+box.height*.4,{steps:6});await page.mouse.up();await page.keyboard.up('Shift');
   const trimStart=Number(await page.locator('#start0').inputValue()),trimEnd=Number(await page.locator('#end0').inputValue());assert(trimStart>.15&&trimEnd<.65);
-  await page.mouse.move(box.x+box.width*.4,box.y+box.height*.5);await page.mouse.down();await page.mouse.move(box.x+box.width*.5,box.y+box.height*.5,{steps:6});await page.mouse.up();
-  assert(Number(await page.locator('#start0').inputValue())>trimStart);assert(Math.abs(Number(await page.locator('#end0').inputValue())-Number(await page.locator('#start0').inputValue())-(trimEnd-trimStart))<.001,'moving preserves selection length');
+  await canvas.focus();await page.keyboard.press('Backspace');
+  await page.waitForFunction(()=>Number(document.getElementById('end0').value)<.7);
+  assert(Number(await page.locator('#end0').inputValue())>.5,'Backspace removes only the selection');
+  await page.keyboard.press('ControlOrMeta+z');
+  await page.waitForFunction(()=>Number(document.getElementById('end0').value)>.99);
+  assert.equal(await canvas.getAttribute('data-wave-columns'),'220');
   await page.locator('#start0').fill('0');await page.locator('#end0').fill('1');
   await page.locator("#apply0").click();
   await page.waitForFunction(
@@ -146,7 +154,7 @@ try {
   await page.waitForFunction(() =>
     document
       .getElementById("status")
-      .textContent.startsWith("Selected offline"),
+      .textContent.startsWith("Files appended"),
   );
   await page.locator("#rate1").selectOption("24");
   await page.locator("#apply1").click();
@@ -309,10 +317,14 @@ try {
   const libraryDownload=page.waitForEvent('download');await page.locator('#library-download').click();
   const libraryFile=await libraryDownload;assert.equal(libraryFile.suggestedFilename(),'Full session.pigeon');
   validateArchive(JSON.parse(await fs.readFile(await libraryFile.path(),'utf8')));
-  if(process.env.PIGEON_TEST_FIRMWARE) {
-    await page.locator('#firmware-file').setInputFiles(process.env.PIGEON_TEST_FIRMWARE);
-    await page.getByText('Firmware package validated locally',{exact:true}).first().waitFor();
-  }
+  await page
+    .locator("#firmware-file")
+    .setInputFiles(path.join(build, "../pigeon.fwsc"));
+  await page.waitForFunction(
+    () =>
+      document.getElementById("status").textContent ===
+      "Firmware package validated locally",
+  );
   const downloaded = page.waitForEvent("download");
   await page.locator("#save").click();
   const download = await downloaded;
@@ -349,7 +361,7 @@ try {
   );
   assert.deepEqual(errors, []);
   console.log(
-    "PIGEON browser: import/encoding, waveform/chop/pad/pattern editing, names, optional firmware validation, export and reload offline, persistence, and responsive layout passed",
+    "PIGEON browser: import/encoding, waveform/chop/pad/pattern editing, names, firmware validation, export and reload offline, persistence, and responsive layout passed",
   );
 } finally {
   await browser.close();

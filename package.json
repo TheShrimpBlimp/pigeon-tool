@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node web/pigeon/test-editing.mjs",
+    "test": "node web/pigeon/test-timeline.mjs && node web/pigeon/test-editing.mjs",
     "test:browser": "node web/pigeon/test-browser.mjs"
   },
   "devDependencies": {

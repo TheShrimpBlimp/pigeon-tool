@@ -367,3 +367,7 @@ body, body *, button, input, select, textarea { font-family: "Little Character",
 .wave {height:180px;cursor:crosshair;touch-action:none}
 .wave:focus-visible{outline:2px solid var(--green,#b9ef77);outline-offset:3px}
 .edit-fields output {align-self:center;color:#a5af99;font-size:13px}
+
+.timeline-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.clip-row[draggable=true]{border:1px solid var(--line,#354531);padding:12px;margin:8px 0;background:#11150d;cursor:grab}.clip-row:active{cursor:grabbing}.clip-row input,.clip-row button{cursor:auto}.wave:focus-visible{outline:2px solid #b9ef77;outline-offset:3px}
+
+.timeline-strip{display:flex;gap:6px;overflow:auto;max-width:100%;padding:8px 0}.timeline-strip button{flex:0 0 auto;min-width:100px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:grab}.timeline-strip button:active{cursor:grabbing}
