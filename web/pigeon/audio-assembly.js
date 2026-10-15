@@ -12,3 +12,26 @@ export function assemble(clips){
  return {pcm,segments,duration:length/22050,name:clips.length===1?clips[0].name:'MERGED',filename:clips.map(c=>c.filename).join(' + ')};
 }
 export function trimmedSegments(segments,start,end){return segments.map(c=>({...c,a:Math.max(start,c.a)-start,b:Math.min(end,c.b)-start})).filter(c=>c.b-c.a>=64);}
+
+// Keep whole source sections first, then provide independent automatic chops.
+export function mergedChops(sections, automatic) {
+ const full=sections.map(c=>({...c}));
+ if(full.length>=32)return full.slice(0,32);
+ const slices=[];
+ for(const section of full)for(const c of automatic){
+  const a=Math.max(section.a,c.a),b=Math.min(section.b,c.b);
+  if(b-a>=64)slices.push({a,b,pitch:0,flags:0});
+ }
+ const room=32-full.length;
+ // Sparse/steady audio still gets playable editable slots: subdivide the longest slices.
+ while(slices.length<room){
+  let index=-1;
+  for(let i=0;i<slices.length;i++)if(slices[i].b-slices[i].a>=128 &&
+    (index<0 || slices[i].b-slices[i].a>slices[index].b-slices[index].a))index=i;
+  if(index<0)break;
+  const c=slices[index],mid=Math.floor((c.a+c.b)/2);
+  slices.splice(index,1,{...c,b:mid},{...c,a:mid});
+ }
+ const chosen=slices.length>room?Array.from({length:room},(_,i)=>slices[Math.floor(i*slices.length/room)]):slices;
+ return [...full,...chosen];
+}
