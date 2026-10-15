@@ -50,10 +50,12 @@ export function arrangeWorkspace() {
     const clipboard = group('Clipboard', ['cut','copy','paste'].map(n=>$(`draft-${n}${i}`)));
     const undo = group('History', ['undo','redo'].map(n=>$(`draft-${n}${i}`)));
     actions.replaceChildren(edit, clipboard, undo); secondary([...actions.querySelectorAll('button')]);
-    const fileLabel = $('file'+i).closest('label'); fileLabel.classList.add('button','secondary','add-audio'); fileLabel.firstChild.textContent='＋ Add audio';
+    const fileLabel = $('file'+i).closest('label'); fileLabel.classList.add('button','secondary','add-audio'); fileLabel.firstChild.textContent='＋ Add audio files';
+    const fileHint=document.createElement('p');fileHint.className='file-hint';fileHint.textContent='Choose one or more files for this slot. Add more anytime — they append to the same song.';
     const sourceTools = group('Source', [fileLabel, ...sourceButtons]);
     secondary([...sourceTools.querySelectorAll('button')]);
     song.querySelector('.song-header').after(sourceTools);
+    sourceTools.after(fileHint);
     const clipBuilder = song.querySelector('.clip-builder'); clipBuilder.open=false; clipBuilder.querySelector('summary').textContent='Clip settings · trim, gain & fades';
     const appendLabel = $('append'+i).closest('label'); appendLabel.hidden=true; // Main Add audio already appends.
     const settings = fold('Export range & quality', [song.querySelector('.trim'), $('source-name'+i)]);
