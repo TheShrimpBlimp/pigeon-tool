@@ -5,7 +5,11 @@ Created and directed by The Shrimp Blimp.
 
 Run `python3 tools/pigeon_gui.py`, or double-click `Open Pigeon.command` on macOS.
 Use Chrome or Edge for USB transfers. The tool works offline after its cache is ready.
-See `web/pigeon/README.md` for detailed instructions. Firmware is maintained separately.
+See [the detailed guide](web/pigeon/README.md) for instructions. Each song slot
+accepts multiple audio files: select several at once, or add more to append them.
+Select and delete sections, split and drag clips, then Apply to commit your song.
+The published storage limit is 408 KiB shared between both songs and the kit.
+Firmware is maintained separately; its local v0.3 candidate is not published.
 
 AI was used for menial coding. All assets, direction, conceptualization, and thought are human.
 GPL-3.0-only; inherited code and assets retain their copyright and licence notices.
@@ -23,3 +27,17 @@ Set `PIGEON_TEST_FIRMWARE` to a local `.fwsc` path to include firmware-package v
 Run `python3 tests/test_launcher.py` for a loopback launch/asset smoke test.
 Windows and Linux launchers are supplied; native OS/browser/device validation
 on those systems remains pending.
+
+## Banks, sessions and the emulator
+
+A `.kob` bank contains audio, chops and playback settings. A `.pigeon` session
+also contains current/saved patterns and supported settings. Use **Try this bank
+in emulator** on the hosted loader, or import a saved bank/session in the emulator.
+The hosted loader and emulator must share an origin for direct handoff; the
+standalone local server does not bundle the emulator. Download and import a file
+when moving between origins.
+
+Device connection and backups are under **Connect / back up**. Library entries
+are under **Saved session library**. Local editing and undo do not write to an
+FM1. Back up separately before **Send bank to FM1**; full-session restore makes
+its own recovery backup.
