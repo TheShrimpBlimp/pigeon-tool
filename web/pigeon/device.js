@@ -73,7 +73,7 @@ export class Device {
       a.length !== 10 ||
       a[0] !== 75 ||
       ![2, 3].includes(a[1]) ||
-      ![0x67000,SIZE].includes(a[2] | (a[3]<<7) | (a[4]<<14)) ||
+      ![0x67000,0x7D000].includes(a[2] | (a[3]<<7) | (a[4]<<14)) ||
       !same(a.slice(5, 8), u21(HEAD)) ||
       a[9] !== 3
     )

@@ -31,14 +31,13 @@ or service workers correctly. No Python or download is needed on the hosted webs
    Expand **Clip settings · trim, gain & fades** for precise per-clip processing.
    Open **Export range & quality** for exact range and 24–64 kbps MP3 quality.
    **Apply to local Song 1/2** encodes and commits the draft to the working bank.
-   Song 2 requires an applied Song 1. Each included clip becomes a chop, up to 32.
+   Song 2 requires an applied Song 1. Whole clips occupy the first chop keys; automatic slices fill the remaining slots, up to 32 total.
 4. Choose up to 16 drum one-shots in pad order. Bulk file selection applies the
    kit locally; a single pad file replaces only that pad. Clear kit removes all pads.
 5. **Save bank** downloads `.kob`. **Try this bank in emulator** opens the applied
    bank or loaded session in the hosted emulator; switch it on to load the content.
-   The published FM1 storage limit is **408 KiB shared** between both songs and kit.
-   The local v0.3 firmware candidate proposes 496 KiB; the web limit stays 408 KiB
-   until that firmware is published. Unlimited browser banks may not fit hardware.
+   The published FM1 storage limit is **496 KiB shared** between both songs and kit.
+   v0.3 uses the expanded pool. Older connected firmware is limited to its reported capacity before any transfer. Unlimited browser banks may not fit hardware.
 6. **Connect / back up** opens FM1 ports and backup tools. Connect matching ports,
    back up the device separately, then **Send bank to FM1** and review the change.
    Sending samples does not automatically make a full-session backup. It verifies
@@ -50,7 +49,7 @@ or service workers correctly. No Python or download is needed on the hosted webs
    partial restore. **Save recovery backup** retains recovery access after reload.
 
 For a complete first-song walkthrough and hardware controls, see
-[the tutorial](https://github.com/TheShrimpBlimp/pigeon/blob/main/docs/KO_MODE.md) in the firmware repository.
+[the tutorial](../../docs/KO_MODE.md) in the firmware repository.
 
 The working bank persists in IndexedDB. Audio-file previews and staged imports
 are temporary. Download bank/session files to keep durable backups. Replacing
