@@ -17,7 +17,7 @@ import {
   HEAD,
   join,
 } from "./bank.js";
-import { editors as createEditors } from "./editors.js?v=30";
+import { editors as createEditors } from "./editors.js?v=31";
 import { WaveEditor } from "./wave-editor-v2.js";
 import { Package, logicalImage } from "../fm1pkg.js";
 import { Updater } from "../fm1ota.js";
