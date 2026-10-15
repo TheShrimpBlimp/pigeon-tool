@@ -26,6 +26,7 @@ export class WaveEditor {
       else this.setZoom(this.zoom-(e.deltaY||e.deltaX)*.005,(e.clientX-canvas.getBoundingClientRect().left)/canvas.getBoundingClientRect().width);
     },{passive:false});
     canvas.addEventListener('dblclick',()=>{if(this.pcm){this.zoom=0;this.scroll=0;this.viewChanged();}});
+    if(typeof ResizeObserver!=='undefined')new ResizeObserver(()=>this.draw()).observe(canvas);
     canvas.addEventListener('keydown',e=>{
       if(!this.pcm||!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();
       const [,span]=this.window(),step=Math.max(1,Math.round(span/1000))*(e.shiftKey?10:1);
@@ -53,11 +54,12 @@ export class WaveEditor {
   set(pcm,a=0,b=pcm?.length||0){if(pcm!==this.pcm){this.cache=null;this.overview=null;this.zoom=0;this.scroll=0;this.cursor=a;}this.pcm=pcm;this.a=a;this.b=b;this.cursor=Math.max(0,Math.min(pcm?.length||0,this.cursor));this.viewChanged();this.canvas.dataset.cursor=String(this.cursor);if(pcm)this.onCursorChange?.(this.cursor);}
   peaks(start,span,width){return Array.from({length:width},(_,x)=>{let lo=1,hi=-1;const begin=start+Math.floor(x*span/width),end=Math.min(this.pcm.length,start+Math.max(Math.floor((x+1)*span/width),Math.floor(x*span/width)+1));for(let i=begin;i<end;i++){lo=Math.min(lo,this.pcm[i]);hi=Math.max(hi,this.pcm[i]);}return [lo,hi];});}
   draw(){
-    const c=this.canvas,w=c.width=1000,h=c.height=164,ctx=c.getContext('2d'),waveHeight=124;
+    const c=this.canvas,w=Math.max(1,Math.round(c.getBoundingClientRect().width)||1000),h=164,dpr=globalThis.devicePixelRatio||1,ctx=c.getContext('2d'),waveHeight=124;
+    c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.fillStyle='#11150d';ctx.fillRect(0,0,w,h);if(!this.pcm)return;
     const [start,span]=this.window();
-    if(!this.cache||this.cache.start!==start||this.cache.span!==span)this.cache={start,span,peaks:this.peaks(start,span,w)};
-    if(!this.overview)this.overview=this.peaks(0,this.pcm.length,w);
+    if(!this.cache||this.cache.start!==start||this.cache.span!==span||this.cache.width!==w)this.cache={start,span,width:w,peaks:this.peaks(start,span,w)};
+    if(!this.overview||this.overview.length!==w)this.overview=this.peaks(0,this.pcm.length,w);
     ctx.fillStyle='#b9ef77';this.cache.peaks.forEach(([lo,hi],x)=>ctx.fillRect(x,(1-hi)*waveHeight/2,1,Math.max(1,(hi-lo)*waveHeight/2)));
     const a=(this.a-start)/span*w,b=(this.b-start)/span*w;
     ctx.fillStyle='#b9ef7726';ctx.fillRect(a,0,b-a,waveHeight);
