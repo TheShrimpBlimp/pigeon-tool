@@ -4,13 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#b9ef77" />
-    <title>PIGEON • FM1 Sampler</title>
+    <title>PIGEON Sample Loader 2.0</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header>
-      <a class="brand" href="./">PIGEON<span>FM1 sampler firmware</span></a>
+      <a class="brand" href="./">PIGEON<span>Sample loader 2.0</span></a>
       <a class="home-link" href="../../">← PIGEON home</a>
       <div class="badges">
         <span id="offline">Preparing offline cache…</span
@@ -22,7 +22,7 @@
       <section class="intro">
         <div>
           <p class="eyebrow">PIGEON FOR M-VAVE FM1</p>
-          <h1>Sampler firmware<br />for the FM1.</h1>
+          <h1>Sample loader 2.0</h1>
           <p>
             Manage two song samples and a 16-pad drum kit.<br />Import audio,
             transfer samples, and back up sessions. Processing runs locally and
@@ -44,7 +44,7 @@
         </div>
       </section>
       <p>Bank (.kob): samples and chop settings. Session (.pigeon): bank, current sequence, saved A–D patterns and settings. Send bank transfers samples; Restore session transfers the complete session.</p>
-      <section class="toolbar">
+      <section class="toolbar"><button id="undo" disabled>Undo</button><button id="redo" disabled>Redo</button>
         <label class="button secondary"
           >Open bank or session<input
             id="open"
@@ -57,6 +57,8 @@
         ><button id="restore" data-device>Restore session to FM1</button
         ><button id="recovery" disabled>Save recovery backup</button>
       </section>
+      <p>Undo local bank, pad and pattern edits with Ctrl+Z / Cmd+Z; redo with Ctrl+Shift+Z / Cmd+Shift+Z or Ctrl+Y. Text fields keep their normal text undo. Undo does not reverse transfers to the FM1.</p>
+      <section class="kit"><h2>Session library</h2><p>Keep named banks and complete sessions in this browser. Download copies to keep them outside this browser.</p><div class="edit-fields"><label>Name<input id="library-name" maxlength="128"></label><label>Saved entries<select id="library-list"></select></label></div><div class="song-actions"><button id="library-save" data-bank>Save current to library</button><button id="library-load">Load selected</button><button id="library-rename">Rename selected</button><button id="library-download">Download selected</button><button id="library-delete">Delete selected</button></div></section>
       <section class="transfer-panel" aria-live="polite">
         <p id="send-help">Open or import a bank, then connect the FM1 to send it.</p>
         <p id="transfer-status"></p>
@@ -161,6 +163,6 @@
 <p>Installer compatibility safeguards, recovery boot stub, and commit-last update design adapted from <a href="https://github.com/Quixotic7/ChoralRootFM1" target="_blank" rel="noopener noreferrer">ChoralRoot FM-1</a> by Quixotic7 and the ChoralRoot FM-1 contributors (GPL-3.0-only). PIGEON adapts the recovery layout to preserve its sample storage.</p>
 <p>Font: <a href="https://github.com/disastrid/LittleCharacter" target="_blank" rel="noopener noreferrer">Little Character</a> (SIL OFL 1.1). MP3 decoding: libmad (GPL-2.0-or-later); browser MP3 encoding: lamejs/LAME (LGPL-3.0). Firmware packages include three JieLi AC79 SDK files (Apache-2.0).</p>
 <p>M-VAVE and FM-1 are trademarks of their respective owners. PIGEON is an independent project.</p></details></footer>
-    <script type="module" src="app.js?v=23"></script>
+    <script type="module" src="app.js?v=25"></script>
   </body>
 </html>

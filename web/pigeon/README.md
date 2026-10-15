@@ -142,3 +142,19 @@ Choose multiple audio files for either song, or add files under Cut and merge cl
 Clip gain ranges from −24 to +12 dB. Fade in/out defaults to 3 ms and can be set from 0 to 100 ms; processing happens when rebuilding. Gain is applied per clip and clipped to the valid audio range and its level is preserved during encoding. No chop naming is required.
 
 To copy a chop onto any existing key in the same song, select the destination in Chop, choose Copy from, and click Copy whole chop here. It overwrites boundaries and all playback settings, preserving chop count and every other key's assignment. Copy settings remains available separately.
+
+
+## Rearranging keys, undo and saved sessions
+
+Select a chop and choose the other key under Copy from. **Swap selected with Copy from** exchanges the two assignments; **Move selected to Copy from key** shifts intervening assignments without discarding chops. Existing pattern note numbers remain unchanged, so their triggered audio follows the new assignments.
+
+In Drum pad settings, select the source pad and a Copy to pad destination, then **Copy pad to key**. Audio and playback settings are copied together; unused intermediate keys become silent pads. Send the edited bank to use it on your physical FM1.
+
+**Undo** and **Redo** retain 20 committed workspace snapshots while this page is open, covering bank, chop, pad, label and pattern/session edits. Ctrl+Z / Cmd+Z undo; Ctrl+Shift+Z / Cmd+Shift+Z and Ctrl+Y redo. Text inputs keep their normal text undo. Staged audio, uncommitted fields, device transfers and library deletions are outside workspace history. Reloading clears undo history but retains the current workspace.
+
+The **Session library** stores named banks and full sessions in this browser. Save, load, rename, delete or download entries. Loading is a local edit and can be undone. Download copies to preserve them outside browser storage. A bank contains samples and settings; a full session also carries patterns and supported device settings.
+
+
+## Sample loader 2.0 waveform controls
+
+Click the waveform to place its cursor; the white cursor head can be dragged. Drag the green S/E flags to trim, drag inside the selection to move the complete region, or Shift-drag a new region. Scroll over the waveform to zoom around the pointer, or use the optional Zoom slider. Drag the overview below the waveform to pan; Alt-drag or Shift-wheel also pans. Double-click resets the view. Arrow keys move the cursor; Home/End jump to the file edges. The cursor follows section and chop previews. Precise numeric start/end fields remain available.

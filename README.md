@@ -1,4 +1,4 @@
-# PIGEON Sample Tool
+# PIGEON Sample Loader 2.0
 
 Local browser sample editor and USB MIDI bank manager for PIGEON FM1 firmware.
 Created and directed by The Shrimp Blimp.
