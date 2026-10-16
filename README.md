@@ -9,7 +9,7 @@ See [the detailed guide](web/pigeon/README.md) for instructions. Each song slot
 accepts multiple audio files: select several at once, or add more to append them.
 Select and delete sections, split and drag clips, then Apply to commit your song.
 The published storage limit is 496 KiB shared between both songs and the kit.
-Compatible with PIGEON v0.3. Older connected firmware is limited to its reported capacity before upload. Whole imported sections come first, followed by automatic chops in the remaining slots.
+Compatible with PIGEON v0.3.1 (and v0.3). Older connected firmware is limited to its reported capacity before upload. Whole imported sections come first, followed by automatic chops in the remaining slots.
 
 AI was used for menial coding. All assets, direction, conceptualization, and thought are human.
 GPL-3.0-only; inherited code and assets retain their copyright and licence notices.
