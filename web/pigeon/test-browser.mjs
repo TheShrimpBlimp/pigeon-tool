@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 const { chromium } = await import(
   process.env.PIGEON_PLAYWRIGHT_MODULE ||
     new URL(
-      "../../build/gui-deps/testing/node_modules/playwright/index.mjs",
+      "../../node_modules/playwright/index.mjs",
       import.meta.url,
     ).href
 );
@@ -323,14 +323,16 @@ try {
   const libraryDownload=page.waitForEvent('download');await page.locator('#library-download').click();
   const libraryFile=await libraryDownload;assert.equal(libraryFile.suggestedFilename(),'Full session.pigeon');
   validateArchive(JSON.parse(await fs.readFile(await libraryFile.path(),'utf8')));
+  if(process.env.PIGEON_TEST_FIRMWARE){
   await page
     .locator("#firmware-file")
-    .setInputFiles(path.join(build, "../pigeon.fwsc"));
+    .setInputFiles(path.resolve(process.env.PIGEON_TEST_FIRMWARE));
   await page.waitForFunction(
     () =>
       document.getElementById("status").textContent ===
       "Firmware package validated locally",
   );
+  }
   const downloaded = page.waitForEvent("download");
   await page.locator("#save").click();
   const download = await downloaded;

@@ -9,7 +9,7 @@ See [the detailed guide](web/pigeon/README.md) for instructions. Each song slot
 accepts multiple audio files: select several at once, or add more to append them.
 Select and delete sections, split and drag clips, then Apply to commit your song.
 The published storage limit is 496 KiB shared between both songs and the kit.
-Compatible with PIGEON v0.3.1 (and v0.3). Older connected firmware is limited to its reported capacity before upload. Whole imported sections come first, followed by automatic chops in the remaining slots.
+Compatible with PIGEON v0.4 projects and older v0.3.1/v0.3 banks and projects. New v0.4 projects cannot be loaded by older firmware. Older connected firmware is limited to its reported capacity before upload. Whole imported sections come first, followed by automatic chops in the remaining slots.
 
 AI was used for menial coding. All assets, direction, conceptualization, and thought are human.
 GPL-3.0-only; inherited code and assets retain their copyright and licence notices.
@@ -41,3 +41,5 @@ Device connection and backups are under **Connect / back up**. Library entries
 are under **Saved session library**. Local editing and undo do not write to an
 FM1. Back up separately before **Send bank to FM1**; full-session restore makes
 its own recovery backup.
+
+The v0.4 preparation updates project parsing to 115 parameters and all 15 step conditions. File editing stays local. The tool remains version 2.0.0; this is a firmware compatibility update.
